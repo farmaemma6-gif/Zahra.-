@@ -3,18 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Message For You</title>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;500&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+    <title>Special Message for You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="world">
-        <div class="sun"></div>
-        <div class="mountain back"></div>
-        <div class="mountain middle"></div>
-        <div class="mountain front"></div>
-        <div class="mist"></div>
+    <div class="scenery">
+        <div class="sky">
+            <div class="sun"></div>
+            <div class="bird-container"><div class="bird"></div></div>
+        </div>
+        <div class="mountain m3"></div>
+        <div class="mountain m2"></div>
+        <div class="mountain m1"></div>
+        <canvas id="petalCanvas"></canvas>
     </div>
 
     <div id="stage"></div>
@@ -22,3 +25,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
