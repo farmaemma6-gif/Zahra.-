@@ -1,63 +1,87 @@
 const quotes = [
-    "Hei, maafin aku ya kalau belakangan ini duniamu terasa sepi karena aku terlalu sibuk..",
-    "Aku sedang berjuang di luar sana, demi bisa melihat senyummu lebih lama nanti..",
-    "Terima kasih sudah menjadi orang paling sabar yang pernah aku kenal.",
-    "Jangan pernah ragu, setiap lelahku tujuannya cuma satu: Kamu.",
-    "I'm coming home soon. Maafin ulat kecil yang sibuk ini ya? 🐛🤍"
+    "Maaf ya kalau duniamu sempat sepi...",
+    "Aku sedang berjuang keras buat kita berdua.",
+    "Bukan ingin menjauh, tapi sedang menabung waktu.",
+    "Terima kasih sudah sabar menunggu ulat kecil ini.",
+    "I love you, more than anything. 🌸🦋"
 ];
 
 const stage = document.getElementById('stage');
+const canvas = document.getElementById('petalCanvas');
+const ctx = canvas.getContext('2d');
 
-function spawnMessage(index) {
-    if (index >= quotes.length) {
-        // Efek akhir: Munculkan bunga mekar permanen atau reset
-        return;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// 1. Particle System untuk Kelopak Bunga (Petals)
+let petals = [];
+class Petal {
+    constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        this.size = Math.random() * 8 + 4;
+        this.speed = Math.random() * 2 + 1;
+        this.angle = Math.random() * 360;
     }
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle * Math.PI / 180);
+        ctx.fillStyle = "#ffc1e3";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size/1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    update() {
+        this.y += this.speed;
+        this.x += Math.sin(this.y / 50);
+        this.angle += 1;
+        if (this.y > canvas.height) this.y = -20;
+    }
+}
+
+function initPetals() {
+    for(let i=0; i<40; i++) petals.push(new Petal());
+}
+
+function animatePetals() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    petals.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animatePetals);
+}
+
+// 2. Animasi Pesan (Ulat & Teks Mekar)
+function spawnMessage(index) {
+    if (index >= quotes.length) return;
 
     const container = document.createElement('div');
     container.className = 'message-container';
     container.innerHTML = `
-        <div class="worm-wrapper">🐛</div>
-        <div class="silk"></div>
-        <div class="glass-card">
-            <p>${quotes[index]}</p>
-        </div>
+        <div class="worm">🐛</div>
+        <div style="width:1px; height:150px; background:white;"></div>
+        <div class="glass-card"><h2>${quotes[index]}</h2></div>
     `;
     stage.appendChild(container);
 
+    const text = container.querySelector('h2');
     const tl = gsap.timeline();
 
-    // 1. Animasi Masuk: Jatuh Halus dengan Overshoot
-    tl.to(container, {
-        top: '25%',
-        duration: 2.5,
-        ease: "back.out(1.2)"
-    });
+    // Masuk: Jatuh dari langit
+    tl.to(container, { top: '30%', duration: 2.5, ease: "bounce.out" });
 
-    // 2. Efek Berayun Kena Angin (Ambient Motion)
-    gsap.to(container, {
-        rotation: 4,
-        duration: 3,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-    });
+    // Efek Teks Mekar (Blur ke Clear + Scale)
+    tl.to(text, { 
+        opacity: 1, filter: "blur(0px)", scale: 1.1, 
+        duration: 1.5, ease: "power2.out" 
+    }, "-=1");
 
-    // 3. Animasi Ulat "Bernapas"
-    gsap.to(container.querySelector('.worm-wrapper'), {
-        scale: 1.1,
-        duration: 0.8,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut"
-    });
+    // Efek Kupu-kupu terbang melintas saat teks mekar
+    spawnButterfly();
 
-    // 4. Animasi Keluar: Ditarik ke atas lagi atau terbang
-    tl.to(container, {
-        top: '-100%',
-        duration: 2,
-        delay: 5,
-        ease: "power3.in",
+    // Keluar: Menghilang lembut
+    tl.to(container, { 
+        opacity: 0, scale: 0.5, duration: 2, delay: 4, 
         onComplete: () => {
             container.remove();
             spawnMessage(index + 1);
@@ -65,8 +89,26 @@ function spawnMessage(index) {
     });
 }
 
-// Start
+function spawnButterfly() {
+    const bf = document.createElement('div');
+    bf.className = 'butterfly';
+    bf.innerHTML = '🦋';
+    document.body.appendChild(bf);
+    
+    gsap.set(bf, { x: -50, y: Math.random() * window.innerHeight });
+    gsap.to(bf, {
+        x: window.innerWidth + 50,
+        y: "-=100",
+        duration: 8,
+        ease: "none",
+        onComplete: () => bf.remove()
+    });
+}
+
+// Start All
 window.onload = () => {
-    // Tambahkan sedikit delay awal biar smooth
-    setTimeout(() => spawnMessage(0), 1000);
+    initPetals();
+    animatePetals();
+    spawnMessage(0);
 };
+
